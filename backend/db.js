@@ -1,6 +1,14 @@
 const mongoose = require('mongoose')
 
-mongoose.connect("mongodb+srv://rafeeqsyedamjad:2PdDTvCjSq1mb8BE@cluster0.kzaz3fa.mongodb.net/")
+const connectToMongoDB = async () => {
+    try {
+        await mongoose.connect("mongodb+srv://rafeeqsyedamjad:2PdDTvCjSq1mb8BE@cluster0.kzaz3fa.mongodb.net/")
+        console.log("Connected to MongoDB");
+    } catch (error) {
+        console.log('Error connecting to MongoDB:', error);
+    }
+};
+
 
 
 // Create a Schema for Users
@@ -12,7 +20,8 @@ const userSchema = new mongoose.Schema({
         unique: true,
         trim:true,
         lowercase:true,
-        minLength
+        minLength: 3,
+        maxLength: 30
     },
     password: {
         type: String,
@@ -33,11 +42,28 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-//    Export the mongoose model from the file (call it User)
-// Create a Modal from the schema
+
+
+
+const accountSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    balance: {
+        type: Number,
+        required: true
+    }
+});
+
 
 const User = mongoose.model('User',userSchema);
+const Account = mongoose.model('Account',accountSchema);
 
-model.exports = {
-    User
+
+module.exports = {
+    connectToMongoDB,
+    User,
+    Account
 };
