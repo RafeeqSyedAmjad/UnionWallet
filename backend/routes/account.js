@@ -1,5 +1,7 @@
 const express = require('express');
+const mongoose = require('mongoose'); // Import mongoose
 const { authMiddleware } = require('../middleware');
+const { Account } = require('../db'); // Import Account model
 
 const router = express.Router();
 
