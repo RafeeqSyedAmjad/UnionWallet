@@ -1,31 +1,30 @@
+// backend/routes/user.js
 const express = require('express');
-const router = express.Router();
 
+const router = express.Router();
 const zod = require("zod");
 const { User, Account } = require("../db");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config");
 const { authMiddleware } = require("../middleware");
 
-
-
-const signupSchema = zod.object({
+const signupBody = zod.object({
     username: zod.string().email(),
     firstName: zod.string(),
     lastName: zod.string(),
-    password:zod.string()
+    password: zod.string()
 })
 
 router.post("/signup", async (req, res) => {
-    const { success } = signupSchema.safeParse(req.body)
-    if(!success) {
+    const { success } = signupBody.safeParse(req.body)
+    if (!success) {
         return res.status(411).json({
             message: "Email already taken / Incorrect inputs"
         })
     }
 
     const existingUser = await User.findOne({
-        username:req.body.username
+        username: req.body.username
     })
 
     if (existingUser) {
@@ -40,10 +39,7 @@ router.post("/signup", async (req, res) => {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
     })
-
     const userId = user._id;
-
-    //// ---- Create new account -------------
 
     await Account.create({
         userId,
@@ -52,26 +48,23 @@ router.post("/signup", async (req, res) => {
 
     const token = jwt.sign({
         userId
-    },JWT_SECRET);
+    }, JWT_SECRET);
 
     res.json({
         message: "User created successfully",
         token: token
     })
-
 })
 
 
-
-const signinShema = zod.object({
+const signinBody = zod.object({
     username: zod.string().email(),
     password: zod.string()
 })
 
-
-router.post("/signin", async(req, res) => {
-    const { success } = signinShema.safeParse(req.body)
-    if(!success) {
+router.post("/signin", async (req, res) => {
+    const { success } = signinBody.safeParse(req.body)
+    if (!success) {
         return res.status(411).json({
             message: "Email already taken / Incorrect inputs"
         })
@@ -85,12 +78,11 @@ router.post("/signin", async(req, res) => {
     if (user) {
         const token = jwt.sign({
             userId: user._id
-        },JWT_SECRET);
+        }, JWT_SECRET);
 
         res.json({
             token: token
         })
-
         return;
     }
 
@@ -98,50 +90,48 @@ router.post("/signin", async(req, res) => {
     res.status(411).json({
         message: "Error while logging in"
     })
-
-
 })
 
-
-const updateSchema = zod.object({
+const updateBody = zod.object({
     password: zod.string().optional(),
-    firstName : zod.string().optional(),
+    firstName: zod.string().optional(),
     lastName: zod.string().optional(),
 })
 
-router.put("/", authMiddleware, async(req,res)=>{
-    const { success } = updateSchema.safeParse(req.body)
-  if (!success) {
-    res.status(411).json({
-        message: 'Error while updating information'
-    })
-  }
-   await User.updateOne({ _id: req.userId }, req.body);
+router.put("/", authMiddleware, async (req, res) => {
+    const { success } = updateBody.safeParse(req.body)
+    if (!success) {
+        res.status(411).json({
+            message: "Error while updating information"
+        })
+    }
 
-   res.json({
-    message: "Update sucessfully"
-   })
+    await User.updateOne(req.body, {
+        id: req.userId
+    })
+
+    res.json({
+        message: "Updated successfully"
+    })
 })
 
-
-router.get("/bulk", async (req,res) => {
+router.get("/bulk", async (req, res) => {
     const filter = req.query.filter || "";
 
     const users = await User.find({
-        $or:[{
+        $or: [{
             firstName: {
-                "regex": filter
+                "$regex": filter
             }
-        },{
-            lastName:{
-                "&regex": filter
+        }, {
+            lastName: {
+                "$regex": filter
             }
         }]
     })
 
-
     res.json({
-        user:users.map(user => ({
+        user: users.map(user => ({
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,

@@ -1,15 +1,6 @@
 const mongoose = require('mongoose')
 
-const connectToMongoDB = async () => {
-    try {
-        await mongoose.connect("mongodb+srv://rafeeqsyedamjad:2PdDTvCjSq1mb8BE@cluster0.kzaz3fa.mongodb.net/")
-        console.log("Connected to MongoDB");
-    } catch (error) {
-        console.log('Error connecting to MongoDB:', error);
-    }
-};
-
-
+ mongoose.connect("mongodb+srv://rafeeqsyedamjad:2PdDTvCjSq1mb8BE@cluster0.kzaz3fa.mongodb.net/")
 
 // Create a Schema for Users
 
@@ -63,7 +54,6 @@ const Account = mongoose.model('Account',accountSchema);
 
 
 module.exports = {
-    connectToMongoDB,
     User,
     Account
 };

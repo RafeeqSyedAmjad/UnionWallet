@@ -9,15 +9,12 @@ import axios from "axios";
 
 const Signup = () => {
     const [firstName,setFirstName] = useState("");
-    const [LastName, setLastName] = useState("");
+    const [lastName, setLastName] = useState("");
     const [username, setUserName] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
-
-
-
-
+    
   return (
       <div className="bg-slate-300 h-screen flex justify-center">
         <div className = "flex flex-col justify-center"> 
@@ -41,7 +38,7 @@ const Signup = () => {
                         const response = await axios.post("http://localhost:3000/api/v1/user/signup",{
                             username,
                             firstName,
-                            LastName,
+                            lastName,
                             password
                         });
                         localStorage.setItem("token",response.data.token)
